@@ -1,0 +1,33 @@
+html {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+.toprow {
+    font-weight: 900;
+    border-bottom: 3px double black;
+}
+
+.headerrow {
+    font-weight: 900;
+    border: 1px solid black;
+    border-bottom: 3px double black;
+}
+
+.val {
+    font-weight: 500;
+}
+
+tr {
+    margin: 0;
+    border: 1px solid black;
+}
+
+td, th {
+    border: 1px solid black;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}

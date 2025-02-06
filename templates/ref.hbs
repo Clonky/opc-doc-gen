@@ -1,0 +1,12 @@
+<tr>
+    {{#if issubtype}}
+    <td colspan="6">Subtype of {{trace.0.node.browsename}} defined in TODO</td>
+    {{else}}
+    <td>{{reftype}}</td>
+    <td>{{trace.0.node.nodeclass}}</td>
+    <td>{{trace.0.node.browsename}}</td>
+    <td>{{trace.0.node.dtype}}</td>
+    <td>{{trace.1.node.browsename}}</td>
+    <td>{{trace.0.node.modellingrule}}</td>
+    {{/if}}
+</tr>

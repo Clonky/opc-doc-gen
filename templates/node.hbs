@@ -1,0 +1,30 @@
+<section id="{{browsename}}">
+    <h2>{{browsename}}</h2>
+    <table>
+        <thead>
+            <tr>
+            <th>Attribute</th>
+            <th colspan="5">Value</th>
+            </tr>
+            <tr>
+                <td>BrowseName</td><td colspan="5">{{browsename}}</td>
+            </tr>
+            <tr class="toprow">
+                <td>IsAbstract</td><td class="val" colspan="5">{{isabstract}}</td>
+            </tr>
+            <tr class="headerrow">
+                <th>References</th>
+                <th>Node Class</th>
+                <th>BrowseName</th>
+                <th>DataType</th>
+                <th>TypeDefinition</th>
+                <th>Other</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each references.refs}}
+                {{>ref}}
+            {{/each}}
+        </tbody>
+    </table>
+</section>
