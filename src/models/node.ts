@@ -12,6 +12,7 @@ interface INode {
   dtype: string;
   modellingrule: string;
   description?: string;
+  extensions?: Extensions | null;
 }
 
 export class Node implements INode {
@@ -23,6 +24,7 @@ export class Node implements INode {
   dtype: string;
   modellingrule: string;
   description?: string | undefined;
+  extensions?: Extensions | null;
 
   parse_nodeclass(tag: string): string {
     if (tag === "UAObjectType") {
@@ -88,6 +90,10 @@ export class Node implements INode {
       const isabstract = node_dom.getAttribute("IsAbstract");
       const refs = node_dom.querySelectorAll("Reference");
       const description_node = node_dom.querySelector("Description");
+      const extensions = node_dom.querySelector("Extensions");
+      if (extensions) {
+        this.extensions = new Extensions(extensions);
+      }
       if (description_node) {
         this.description = description_node.textContent ?? "";
       } else {
@@ -179,6 +185,27 @@ class References {
       return typedef;
     }
   }
+}
+
+class Extension {
+  tag: string;
+  text: string | null;
+
+  constructor(node: Element) {
+    this.tag = node.tagName;
+    this.text = node.textContent;
+  }
+}
+
+class Extensions {
+  extension: Extension[]
+
+  constructor(node: Element) {
+    this.extension = Array.from(node.querySelectorAll("Extension")).map(
+      (ielement) => new Extension(ielement)
+    );
+  }
+
 }
 
 interface ILinkedNode {

@@ -25,10 +25,29 @@ export class DocWriter implements IWriter {
       properties: {
         type: docx.SectionType.CONTINUOUS,
       },
-      children: [this.create_heading(node), this.create_description(node), this.create_table(node)],
+      children: [this.create_heading(node), this.create_description(node), this.create_table(node), ...this.create_implementation_notes(node)],
     };
     sections.push(new_section);
     return sections;
+  }
+
+  create_implementation_notes(node: Node): docx.Paragraph[] {
+    if (node.extensions) {
+      const pars = Array.from(node.extensions.extension).map((iextension) => {
+        if (iextension.text) {
+          return new docx.Paragraph({
+            text: iextension.text,
+          });
+        } else {
+          return new docx.Paragraph({
+            text: "",
+          });
+        }
+      });
+      return pars
+    } else {
+      return [];
+    }
   }
 
   create_heading(node: Node) {
