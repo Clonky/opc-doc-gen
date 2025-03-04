@@ -97,6 +97,7 @@ describe("Test linked node functionality", () => {
     );
   });
   test("Try tracing nodes", async () => {
+    const expected = 2 // This was reduced from 4 to 2 because the tracer is limited to two traces now.
     const target_nodeid = new NodeId("ns=4;i=5003");
     const comp_specs = await setup_specs(
       "http://opcfoundation.org/UA/Weihenstephan/"
@@ -104,6 +105,6 @@ describe("Test linked node functionality", () => {
     const node = comp_specs?.target_spec?.lookup(target_nodeid);
     const linkedNode = new LinkedNode(node!, comp_specs!.target_spec!);
     const nodeStack = linkedNode.trace(comp_specs!, []);
-    expect(nodeStack.length).toBe(4);
+    expect(nodeStack.length).toBe(expected);
   });
 });

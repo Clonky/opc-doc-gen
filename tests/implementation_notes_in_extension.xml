@@ -1,0 +1,12 @@
+<xml>
+    <UAObjectType Browsename="Testcase" NodeId="ns=1;i=1">
+        <DisplayName>Testcase</DisplayName>
+        <Description>This is the top lvl testcase object type</Description>
+        <References>
+            <Reference ReferenceType="HasAddin">ns=1,i=2</Reference>
+        </References>
+        <Extensions>
+            <Extension>UA:Component1: First Component Implementation Note</Extension>
+        </Extension>
+    </UAObjectType>
+</xml>
