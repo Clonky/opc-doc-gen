@@ -199,4 +199,22 @@ export class WriteResult {
     this.html = html;
     this.blob = blob;
   }
+
+  async saveToFile(directory: string, filename: string = "document.docx"): Promise<void> {
+    if (typeof window === 'undefined') {
+      try {
+        const fs = await import('fs');
+        const path = await import('path');
+        const filepath = path.join(directory, filename);
+        const content = await (await this.blob).arrayBuffer();
+        const buffer = Buffer.from(content);
+
+        await fs.promises.writeFile(filepath, buffer);
+      } catch {
+        throw new Error("Failed to write to file in NodeJS.");
+      }
+    } else {
+      throw new Error("Failed to write file in NodeJS.")
+    }
+  }
 }

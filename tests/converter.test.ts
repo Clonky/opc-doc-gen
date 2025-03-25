@@ -28,6 +28,7 @@ describe("Check the correct execution of the converter classes", () => {
   test("Create converter", async () => {
     const converter = await setup_converter("http://opcfoundation.org/UA/DI/");
     const out = converter.write();
+    await out.saveToFile("./", "test.docx");
     expect(out).toBeDefined();
   });
 });

@@ -6,3 +6,5 @@ dist/**/*
 examples/parse_ws_out.html
 eslint.config.js
 tests/resources/**/*
+*.xlsx
+*.xlsm
