@@ -227,13 +227,10 @@ export class LinkedNode {
   trace(cs: CompanionSpecifications, state: ILinkedNode[]): ILinkedNode[] {
     state.push(new LinkedNode(this.node, this.parent_nodeset));
     if (state.length >= 2) {
+      // exit early if we already got two links, otherwise we are tracing until corespec
       return state
     }
     const next_ref = this.node.references.get_typedef();
-    if (state.length >= 2) {
-      // exit early if we already got two links, otherwise we are tracing until corespec
-      return state;
-    }
     if (next_ref) {
       const target_uri = this.parent_nodeset.get_uri_by_ns_id(next_ref.nodeid);
       const target_spec = cs.lookup(target_uri);
