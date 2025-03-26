@@ -8,3 +8,4 @@ eslint.config.js
 tests/resources/**/*
 *.xlsx
 *.xlsm
+*.docx
