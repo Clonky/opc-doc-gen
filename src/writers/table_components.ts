@@ -112,7 +112,7 @@ export class TableRefs implements ITableComponent {
         refrows.push(refrow);
       } catch (e) {
         throw Error(
-          `Failed with ${e} while writing ref: ${JSON.stringify(iref)}`
+          `Failed with ${e} while writing ref: ${JSON.stringify(iref, null, 2)}`
         );
       }
     }
