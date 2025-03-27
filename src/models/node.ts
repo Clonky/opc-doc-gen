@@ -237,6 +237,7 @@ export class LinkedNode {
       const target_node = target_spec.lookup(next_ref.nodeid);
       return new LinkedNode(target_node, target_spec).trace(cs, state);
     } else {
+      // In case we haven't found a next reference by typedef or subtype, return the current trace
       return state;
     }
   }
