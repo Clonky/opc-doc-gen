@@ -103,6 +103,8 @@ export class TableRefs implements ITableComponent {
         let typedef = "";
         if (iref.trace[0].node.nodeclass === "Method") {
           typedef = "";
+        } else if (iref.reftype == "HasSubtype") {
+          continue;
         } else if (iref.trace.length > 0) {
           typedef = iref.trace[1].node.browsename;
         } else {
