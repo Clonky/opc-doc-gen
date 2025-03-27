@@ -8,7 +8,7 @@ import * as fs from "fs";
 
 const setup = async () => {
   const dom = await JSDOM.fromFile(
-    "tests/resources/07_Opc.Ua.Weihenstephan.NodeSet2.xml"
+    "tests/resources/Opc.Ua.Weihenstephan.NodeSet2.xml"
   );
   return new CompanionSpecification(dom.window.document);
 };
