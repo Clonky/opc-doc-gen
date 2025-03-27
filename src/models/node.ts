@@ -117,7 +117,7 @@ export class Node implements INode {
   }
 }
 
-interface IReference {
+export interface IReference {
   reftype: string;
   nodeid: INodeId;
   issubtype: boolean;

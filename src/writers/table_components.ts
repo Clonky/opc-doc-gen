@@ -1,6 +1,6 @@
 import * as docx from "docx";
 import * as layout from "./layout_components";
-import { Node, RefAndTrace } from "../models/node";
+import { Node, RefAndTrace, IReference } from "../models/node";
 
 
 interface ITableComponent {
@@ -89,8 +89,18 @@ export class TableRefs implements ITableComponent {
     this.node = node;
   }
 
+  isRefAndTrace(ref: IReference | RefAndTrace | undefined): ref is RefAndTrace {
+    return (ref as RefAndTrace).trace !== undefined;
+  }
+
   write(): docx.TableRow[] {
     const refrows: docx.TableRow[] = [];
+    let subtype_ref = this.node.references.refs.find((iref) => iref.reftype === "HasSubtype");
+    if (subtype_ref) {
+      if (this.isRefAndTrace(subtype_ref)) {
+        refrows.push(new layout.RefRow(subtype_ref.reftype, subtype_ref.trace[0].node.nodeclass, subtype_ref.trace[0].node.browsename, "", "HasSubtype", "").write())
+      }
+    }
 
     for (const iref of this.node.references.refs as unknown as RefAndTrace[]) {
       if (iref === null) {
