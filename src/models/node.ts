@@ -201,7 +201,8 @@ class Extensions {
   extension: Extension[]
 
   constructor(node: Element) {
-    this.extension = Array.from(node.querySelectorAll("Extension")).map(
+    // This is currently hardwired to expect the ws namespace. Might have to change in the future
+    this.extension = Array.from(node.querySelectorAll("ws\\:Extension")).map(
       (ielement) => new Extension(ielement)
     );
   }
