@@ -1,7 +1,8 @@
 import * as docx from "docx";
 import { Node } from "../models/node";
-import { TableRefs, TableTop } from "./table_components";
+import { TableRefs } from "./table_components";
 import { Table } from "./layout_components";
+import { CompanionSpecification } from "../models/companion_specification";
 
 interface IWriter {
   write(): Buffer | Promise<Blob>;
@@ -9,10 +10,12 @@ interface IWriter {
 
 export class DocWriter implements IWriter {
   doc: docx.Document;
+  target_spec: CompanionSpecification
   nodes: Node[];
 
-  constructor(nodes: Node[]) {
+  constructor(nodes: Node[], target_spec: CompanionSpecification) {
     this.doc = new docx.Document({ sections: [] });
+    this.target_spec = target_spec;
     if (nodes.every((inode) => inode.browsename)) {
       this.nodes = nodes;
     } else {
@@ -20,20 +23,90 @@ export class DocWriter implements IWriter {
     }
   }
 
-  create_section(node: Node, sections: docx.ISectionOptions[]) {
+  write(): Promise<Blob> {
+    let sections: docx.ISectionOptions[] = [];
+    for (const inode of this.nodes) {
+      try {
+        sections.push(new NodeWriter(inode).write())
+      } catch (e) {
+        throw `Failed at node: ${inode.browsename} with error: ${e}`;
+      }
+    }
+    sections.push(new NamespaceTableWriter(this.target_spec).write());
+    this.doc = new docx.Document({
+      sections: sections,
+    });
+    return docx.Packer.toBlob(this.doc);
+  }
+}
+
+class NamespaceTableWriter {
+  target_spec: CompanionSpecification
+
+  constructor(target_spec: CompanionSpecification) {
+    this.target_spec = target_spec
+  }
+
+  write(): docx.ISectionOptions {
     const new_section = {
       properties: {
         type: docx.SectionType.CONTINUOUS,
       },
-      children: [this.create_heading(node), this.create_description(node), this.create_table(node), ...this.create_implementation_notes(node)],
+      children: [this.create_heading(), this.create_table()],
     };
-    sections.push(new_section);
-    return sections;
+    return new_section
   }
 
-  create_implementation_notes(node: Node): docx.Paragraph[] {
-    if (node.extensions) {
-      const pars = Array.from(node.extensions.extension).map((iextension) => {
+  create_heading(): docx.Paragraph {
+    return new docx.Paragraph({
+      text: "Namespaces used in this document",
+      heading: docx.HeadingLevel.HEADING_2,
+    })
+  }
+
+  create_table(): docx.Table {
+    let rows: docx.TableRow[] = [];
+    for (const [index, ns] of this.target_spec.get_namespaces().entries()) {
+      rows.push(new docx.TableRow({
+        children: [
+          new docx.TableCell({ children: [new docx.Paragraph(index.toString())] }),
+          new docx.TableCell({ children: [new docx.Paragraph(ns)] }),
+          new docx.TableCell({ children: [new docx.Paragraph("#Example")] }),
+        ]
+      })
+      )
+    };
+    let table = new docx.Table({
+      width: {
+        size: 100,
+        type: docx.WidthType.PERCENTAGE,
+      },
+      rows: rows
+    });
+    return table
+  }
+}
+
+class NodeWriter {
+  node: Node
+
+  constructor(node: Node) {
+    this.node = node
+  }
+
+  write(): docx.ISectionOptions {
+    const new_section = {
+      properties: {
+        type: docx.SectionType.CONTINUOUS,
+      },
+      children: [this.create_heading(), this.create_description(), this.create_table(), ...this.create_implementation_notes()],
+    };
+    return new_section
+  }
+
+  create_implementation_notes(): docx.Paragraph[] {
+    if (this.node.extensions) {
+      const pars = Array.from(this.node.extensions.extension).map((iextension) => {
         if (iextension.text) {
           return new docx.Paragraph({
             text: iextension.text,
@@ -50,18 +123,18 @@ export class DocWriter implements IWriter {
     }
   }
 
-  create_heading(node: Node) {
+  create_heading() {
     return new docx.Paragraph({
-      text: node.browsename,
+      text: this.node.browsename,
       heading: docx.HeadingLevel.HEADING_2,
     });
   }
 
-  create_description(node: Node) {
+  create_description() {
     return new docx.Paragraph({
       children: [
         new docx.TextRun({
-          text: node.description,
+          text: this.node.description,
           font: "Calibri",
           size: 16,
         })
@@ -69,32 +142,17 @@ export class DocWriter implements IWriter {
     });
   }
 
-  create_table(node: Node) {
-    const rows = new Table(node).write();
+  create_table() {
+    const rows = new Table(this.node).write();
     let refrows: docx.TableRow[] = [];
     try {
-      refrows = new TableRefs(node).write();
+      refrows = new TableRefs(this.node).write();
     } catch (e) {
       throw Error(
-        `Encountered error ${e} during writing of reference rows for node: ${node.browsename}`
+        `Encountered error ${e} during writing of reference rows for node: ${this.node.browsename}`
       );
     }
     const table = new docx.Table({ rows: [...rows, ...refrows] });
     return table;
-  }
-
-  write(): Promise<Blob> {
-    let sections: docx.ISectionOptions[] = [];
-    for (const inode of this.nodes) {
-      try {
-        sections = this.create_section(inode, sections);
-      } catch (e) {
-        throw `Failed at node: ${inode.browsename} with error: ${e}`;
-      }
-    }
-    this.doc = new docx.Document({
-      sections: sections,
-    });
-    return docx.Packer.toBlob(this.doc);
   }
 }

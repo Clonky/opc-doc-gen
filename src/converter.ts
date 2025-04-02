@@ -11,6 +11,8 @@ interface IConverter {
   specs: CompanionSpecifications;
 
   write(): void;
+  get_target_spec(): CompanionSpecification;
+
 }
 
 const template_refs = `
@@ -87,6 +89,10 @@ export class SiomeConverter implements IConverter {
     this.specs = specs;
   }
 
+  get_target_spec(): CompanionSpecification {
+    return this.specs.target_spec!;
+  }
+
   link_refs_in_node(inode: Node): void {
     inode.references.refs.forEach((iref, index) => {
       const ref_uri = this.specs.target_spec?.get_uri_by_ns_id(iref.nodeid);
@@ -125,13 +131,16 @@ export class SiomeConverter implements IConverter {
     this.node_template = handlebars.compile(template_node);
   }
 
+  create_html(nodes: Node[]): string {
+    const node_contents: string[] = nodes.map((inode) => this.node_template(inode));
+    return node_contents.join("\n");
+  }
+
   write(): WriteResult {
     const nodes = this.get_traced_nodes();
-    const node_contents: string[] = nodes.map((inode) =>
-      this.node_template(inode)
-    );
-    const blob = new DocWriter(nodes).write();
-    return new WriteResult(node_contents.join("\n"), blob);
+    const html = this.create_html(nodes);
+    const blob = new DocWriter(nodes, this.specs.target_spec).write();
+    return new WriteResult(html, blob);
   }
 }
 

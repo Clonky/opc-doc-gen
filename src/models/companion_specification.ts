@@ -10,6 +10,7 @@ interface ICompanionSpecifications {
 
 export interface ICompanionSpecification {
   nodeset: Document;
+  uri: string;
 
   get_model_uri(): string;
   get_own_ns_id(): number;
@@ -88,8 +89,7 @@ export class CompanionSpecification implements ICompanionSpecification {
       return node;
     } else {
       throw Error(
-        `Node with nodeid ${
-          nodeid.suffix
+        `Node with nodeid ${nodeid.suffix
         } could not be found in spec: ${this.get_model_uri()}`
       );
     }
