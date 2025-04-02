@@ -13,62 +13,6 @@ interface IConverter {
   write(): void;
 }
 
-//export class Converter implements IConverter {
-//target: string;
-//specs: CompanionSpecifications;
-
-//constructor(target: string, path_to_cs_dir: string) {
-//this.target = target;
-//const specs = CompanionSpecifications.from_folder(target, path_to_cs_dir);
-//if (specs) {
-//this.specs = specs;
-//} else {
-//throw Error("Failed to construct companion specifications from folder.");
-//}
-//}
-
-//link_refs_in_node(inode: Node): void {
-//inode.references.refs.forEach((iref, index) => {
-//const ref_uri = this.specs.target_spec?.get_uri_by_ns_id(iref.nodeid);
-//const ref_spec = this.specs.lookup(ref_uri!);
-//const ref_node = ref_spec.lookup(iref.nodeid);
-//const trace = new LinkedNode(ref_node, ref_spec).trace(this.specs, []);
-//trace.forEach((itrace, index) => {
-//// Localize the browsename prefixes in relation to the target_spec
-//const ns_id = this.specs.target_spec?.get_ns_id_by_uri(
-//itrace.parent_nodeset.get_model_uri(),
-//);
-//itrace.node.browsename = itrace.node.browsename.replace(
-///^.:/,
-//`${ns_id}:`,
-//);
-//});
-//inode.references.refs[index] = new RefAndTrace(iref, trace);
-//});
-//}
-
-//write(): string {
-//const nodes = this.specs.target_spec?.get_nodes_of_types();
-//handlebars.registerPartial(
-//"ref",
-//readFileSync("templates/ref.hbs", "utf-8"),
-//);
-//const node_template = handlebars.compile(
-//readFileSync("templates/node.hbs", "utf-8"),
-//);
-//if (nodes) {
-//const node_contents: string[] = nodes.map((inode) => {
-//this.link_refs_in_node(inode);
-//const curr = node_template(inode);
-//return curr;
-//});
-//return node_contents.join("\n");
-//} else {
-//throw Error("Failed to parse the nodeset.");
-//}
-//}
-//}
-
 const template_refs = `
 <tr>
     {{#if issubtype}}
