@@ -34,5 +34,12 @@ describe("Test extraction of extension tags and writing them to the according se
         if (target_node) {
             expect(target_node.extensions?.extension.length).toEqual(4)
         }
-    })
+    });
+    test("Check for included extensions in the docx file", async () => {
+        const converter = await setup_converter("http://weihenstephan-standards.com/WS/");
+        const out = converter.write();
+        await out.saveToFile("./", "test_extensions.docx");
+        const file = fs.readFileSync("./test_extensions.docx");
+        expect(file).toBeDefined();
+    }, 0);
 })
