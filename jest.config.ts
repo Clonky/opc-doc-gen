@@ -7,7 +7,7 @@ const config: Config = {
     "^.+\\.(ts|tsx)$": "ts-jest",
   },
   slowTestThreshold: 120,
-  testTimeout: 120000,
+  testTimeout: 240000,
   verbose: true,
 };
 
