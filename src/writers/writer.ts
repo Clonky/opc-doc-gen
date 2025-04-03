@@ -3,6 +3,7 @@ import { Node } from "../models/node";
 import { TableRefs } from "./table_components";
 import { Table } from "./layout_components";
 import { CompanionSpecification } from "../models/companion_specification";
+import { Type } from "@angular/core";
 
 interface IWriter {
   write(): Buffer | Promise<Blob>;
@@ -34,7 +35,119 @@ export class DocWriter implements IWriter {
     }
     sections.push(new NamespaceTableWriter(this.target_spec).write());
     this.doc = new docx.Document({
+      features: {
+        updateFields: true,
+      },
+      numbering: {
+        config: [
+          {
+            reference: "headingNumbering",
+            levels: [
+              {
+                level: 0,
+                format: "decimal",
+                text: "%1",
+                alignment: "start",
+              },
+              {
+                level: 1,
+                format: "decimal",
+                text: "%1.%2",
+                alignment: "start",
+              },
+              {
+                level: 2,
+                format: "decimal",
+                text: "%1.%2.%3",
+                alignment: "start",
+              }
+            ]
+          }
+        ]
+      },
       sections: sections,
+      styles: {
+        default: {
+          heading1:
+          {
+            next: "paragraph",
+            quickFormat: true,
+            basedOn: "paragraph",
+            run: {
+              bold: true,
+              font: "Arial",
+              size: "11pt",
+            },
+            paragraph: {
+              numbering: {
+                reference: "headingNumbering",
+                level: 0,
+              },
+              keepNext: true,
+              spacing: {
+                before: 10,
+                after: 10,
+              },
+              indent: {
+                hanging: "0.7cm",
+              },
+            }
+          },
+          heading2: {
+            basedOn: "heading1",
+            run: {
+              bold: true,
+              font: "Arial",
+              size: "10pt",
+            },
+            paragraph: {
+              numbering: {
+                reference: "headingNumbering",
+                level: 1,
+              },
+              spacing: {
+                before: 5,
+                after: 5,
+              },
+              indent: {
+                hanging: "1.1cm",
+              },
+            }
+          },
+        },
+        paragraphStyles: [
+          {
+            id: "paragraph",
+            name: "PARAGRAPH;PA",
+            basedOn: "Normal",
+            quickFormat: true,
+            run: {
+              font: "Arial",
+              size: "10pt",
+            },
+            paragraph: {
+              spacing: {
+                before: 5,
+                after: 10,
+              },
+            },
+          },
+          {
+            id: "tableTitle",
+            name: "TABLE-title",
+            basedOn: "paragraph",
+            quickFormat: true,
+            paragraph: {
+              alignment: "center"
+            },
+            run: {
+              bold: true,
+              font: "Arial",
+              size: "10pt",
+            },
+          }
+        ]
+      }
     });
     return docx.Packer.toBlob(this.doc);
   }
@@ -99,9 +212,16 @@ class NodeWriter {
       properties: {
         type: docx.SectionType.CONTINUOUS,
       },
-      children: [this.create_heading(), this.create_description(), this.create_table(), ...this.create_implementation_notes()],
+      children: [this.create_table_of_contents(), this.create_heading(), this.create_description(), this.create_caption(), this.create_table(), ...this.create_implementation_notes()],
     };
     return new_section
+  }
+
+  create_table_of_contents() {
+    return new docx.TableOfContents("Summary", {
+      hyperlink: true,
+      headingStyleRange: "1-3",
+    })
   }
 
   create_implementation_notes(): docx.Paragraph[] {
@@ -135,11 +255,25 @@ class NodeWriter {
       children: [
         new docx.TextRun({
           text: this.node.description,
-          font: "Calibri",
-          size: 16,
         })
-      ]
+      ],
+      style: "paragraph"
     });
+  }
+
+  create_caption() {
+    return new docx.Paragraph({
+      children: [
+        new docx.TextRun({
+          text: "Table ",
+          bold: true,
+        }),
+        new docx.SimpleField("SEQ Table \\* ARABIC"),
+        new docx.TextRun(" " + this.node.browsename + "Definition"),
+      ],
+      style: "tableTitle"
+    })
+
   }
 
   create_table() {
