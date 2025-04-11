@@ -4,27 +4,27 @@ import { CompanionSpecification } from '../src/models/companion_specification';
 import { Document, Packer, HeadingLevel, SectionType, WidthType, BorderStyle } from 'docx';
 
 jest.mock('docx', () => {
-    const mockParagraph = jest.fn().mockImplementation(function(options = {}) {
+    const mockParagraph = jest.fn().mockImplementation(function (options = {}) {
         return { type: 'paragraph', ...options };
     });
 
-    const mockTable = jest.fn().mockImplementation(function(options = {}) {
+    const mockTable = jest.fn().mockImplementation(function (options = {}) {
         return { type: 'table', ...options };
     });
 
-    const mockTableRow = jest.fn().mockImplementation(function(options = {}) {
+    const mockTableRow = jest.fn().mockImplementation(function (options = {}) {
         return { type: 'table-row', ...options };
     });
 
-    const mockTableCell = jest.fn().mockImplementation(function(options = {}) {
+    const mockTableCell = jest.fn().mockImplementation(function (options = {}) {
         return { type: 'table-cell', ...options };
     });
 
-    const mockTextRun = jest.fn().mockImplementation(function(options = {}) {
+    const mockTextRun = jest.fn().mockImplementation(function (options = {}) {
         return { type: 'text-run', ...options };
     });
 
-    const mockDocument = jest.fn().mockImplementation(function(options = {}) {
+    const mockDocument = jest.fn().mockImplementation(function (options = {}) {
         return {
             ...options,
             sections: options.sections || [],
@@ -43,10 +43,10 @@ jest.mock('docx', () => {
         TableRow: mockTableRow,
         TableCell: mockTableCell,
         TextRun: mockTextRun,
-        TableOfContents: jest.fn().mockImplementation(function(options = {}) {
+        TableOfContents: jest.fn().mockImplementation(function (options = {}) {
             return { type: 'table-of-contents', ...options };
         }),
-        SimpleField: jest.fn().mockImplementation(function(options = {}) {
+        SimpleField: jest.fn().mockImplementation(function (options = {}) {
             return { type: 'simple-field', ...options };
         }),
         Packer: {
@@ -60,7 +60,7 @@ jest.mock('docx', () => {
             DOUBLE: 'double',
             NONE: 'none'
         },
-        convertMillimetersToTwip: jest.fn().mockImplementation((mm) => mm * 56.7)
+        convertMillimetersToTwip: jest.fn().mockImplementation((mm) => mm * 56.7) // Approximate conversion: 1mm ≈ 56.7 twips
     };
 });
 
@@ -75,7 +75,12 @@ describe('DocWriter', () => {
             createMockNode('Node1'),
             createMockNode('Node2')
         ] as Node[];
-        const mockSpec = createMockSpec();
+        const mockSpec = {
+            get_namespaces: jest.fn().mockReturnValue(['Namespace1', 'Namespace2']),
+            get_model_uri: jest.fn().mockReturnValue('http://test.org/UA/Mock/'),
+            get_uri_by_ns_id: jest.fn().mockReturnValue('http://test.org/UA/Mock/'),
+            lookup: jest.fn()
+        } as unknown as CompanionSpecification;
 
         const writer = new DocWriter(mockNodes, mockSpec);
 
@@ -85,14 +90,19 @@ describe('DocWriter', () => {
 
     it('should throw an error if nodes are malformed', () => {
         const mockNodes = [{ invalidProp: 'Invalid' }] as unknown as Node[];
-        const mockSpec = createMockSpec();
+        const mockSpec = { get_namespaces: jest.fn() } as unknown as CompanionSpecification;
 
         expect(() => new DocWriter(mockNodes, mockSpec)).toThrowError('Some nodes passed to the writer were malformed');
     });
 
     it('should call docx.Packer.toBlob when write is invoked', async () => {
         const mockNodes = [createMockNode('Node1')] as Node[];
-        const mockSpec = createMockSpec();
+        const mockSpec = {
+            get_namespaces: jest.fn().mockReturnValue(['Namespace1']),
+            get_model_uri: jest.fn().mockReturnValue('http://test.org/UA/Mock/'),
+            get_uri_by_ns_id: jest.fn().mockReturnValue('http://test.org/UA/Mock/'),
+            lookup: jest.fn()
+        } as unknown as CompanionSpecification;
 
         const writer = new DocWriter(mockNodes, mockSpec);
         const result = await writer.write();
@@ -103,28 +113,16 @@ describe('DocWriter', () => {
     });
 });
 
-function createMockSpec(): CompanionSpecification {
-    return {
-        get_namespaces: jest.fn().mockReturnValue(['Namespace1']),
-        get_model_uri: jest.fn().mockReturnValue('http://test.org/UA/Mock/'),
-        get_uri_by_ns_id: jest.fn().mockReturnValue('http://test.org/UA/Mock/'),
-        lookup: jest.fn(),
-        get_own_ns_id: jest.fn().mockReturnValue(1),
-        nodeset: {} as Document,
-        uri: 'http://test.org/UA/Mock/'
-    } as unknown as CompanionSpecification;
-}
-
 function createMockNode(name: string): Node {
-    const mockNodeData = {
+    return {
         browsename: name,
         description: 'Test Node',
         isabstract: 'false',
         nodeclass: 'Object',
         dtype: '',
         modellingrule: '',
-        nodeid: { 
-            prefix: 0, 
+        nodeid: {
+            prefix: 0,
             suffix: '1'
         },
         references: {
@@ -133,56 +131,19 @@ function createMockNode(name: string): Node {
                     reftype: 'HasTypeDefinition',
                     nodeid: { prefix: 0, suffix: '58' },
                     issubtype: false,
-                    trace: [
-                        {
-                            node: {
-                                browsename: 'BaseObjectType',
-                                nodeclass: 'ObjectType',
-                                dtype: '',
-                                modellingrule: '',
-                                references: { 
-                                    refs: [],
-                                    get_typedef: () => null
-                                },
-                                nodeid: {
-                                    prefix: 0,
-                                    suffix: '58'
-                                }
-                            },
-                            parent_nodeset: {
-                                get_model_uri: () => 'http://test.org/UA/Mock/',
-                                get_uri_by_ns_id: () => 'http://test.org/UA/Mock/',
-                                get_own_ns_id: () => 0,
-                                lookup: () => null,
-                                nodeset: {} as Document,
-                                uri: 'http://test.org/UA/Mock/'
-                            }
+                    trace: [{
+                        node: {
+                            browsename: 'BaseObjectType',
+                            nodeclass: 'ObjectType',
+                            dtype: '',
+                            modellingrule: '',
+                            references: { refs: [] }
                         },
-                        {
-                            node: {
-                                browsename: 'BaseType',
-                                nodeclass: 'ObjectType',
-                                dtype: '',
-                                modellingrule: '',
-                                references: { 
-                                    refs: [],
-                                    get_typedef: () => null
-                                },
-                                nodeid: {
-                                    prefix: 0,
-                                    suffix: '58'
-                                }
-                            },
-                            parent_nodeset: {
-                                get_model_uri: () => 'http://test.org/UA/Mock/',
-                                get_uri_by_ns_id: () => 'http://test.org/UA/Mock/',
-                                get_own_ns_id: () => 0,
-                                lookup: () => null,
-                                nodeset: {} as Document,
-                                uri: 'http://test.org/UA/Mock/'
-                            }
+                        parent_nodeset: {
+                            get_model_uri: () => 'http://test.org/UA/Mock/',
+                            get_uri_by_ns_id: () => 'http://test.org/UA/Mock/'
                         }
-                    ]
+                    }]
                 }
             ],
             get_typedef: () => ({
@@ -191,25 +152,5 @@ function createMockNode(name: string): Node {
                 issubtype: false
             })
         }
-    };
-
-    // Create a proper Node instance
-    const node = new Node({
-        tagName: 'UAObject',
-        getAttribute: (name: string) => {
-            switch (name) {
-                case 'BrowseName': return mockNodeData.browsename;
-                case 'NodeId': return `ns=${mockNodeData.nodeid.prefix};i=${mockNodeData.nodeid.suffix}`;
-                case 'IsAbstract': return mockNodeData.isabstract;
-                default: return null;
-            }
-        },
-        querySelectorAll: () => [] as any,
-        querySelector: () => null
-    } as unknown as Element);
-
-    // Add the mock data to the node instance
-    Object.assign(node, mockNodeData);
-    
-    return node;
+    } as unknown as Node;
 }
