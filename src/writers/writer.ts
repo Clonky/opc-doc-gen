@@ -3,7 +3,6 @@ import { Node } from "../models/node";
 import { TableRefs } from "./table_components";
 import { Table } from "./layout_components";
 import { CompanionSpecification } from "../models/companion_specification";
-import { Type } from "@angular/core";
 
 interface IWriter {
   write(): Buffer | Promise<Blob>;
@@ -26,6 +25,12 @@ export class DocWriter implements IWriter {
 
   write(): Promise<Blob> {
     let sections: docx.ISectionOptions[] = [];
+    sections.push({
+      properties: {
+        type: docx.SectionType.CONTINUOUS,
+      },
+      children: [this.create_table_of_contents()]
+    });
     for (const inode of this.nodes) {
       try {
         sections.push(new NodeWriter(inode).write())
@@ -151,6 +156,13 @@ export class DocWriter implements IWriter {
     });
     return docx.Packer.toBlob(this.doc);
   }
+
+  create_table_of_contents() {
+    return new docx.TableOfContents("Summary", {
+      hyperlink: true,
+      headingStyleRange: "1-3",
+    })
+  }
 }
 
 class NamespaceTableWriter {
@@ -212,17 +224,11 @@ class NodeWriter {
       properties: {
         type: docx.SectionType.CONTINUOUS,
       },
-      children: [this.create_table_of_contents(), this.create_heading(), this.create_description(), this.create_caption(), this.create_table(), ...this.create_implementation_notes()],
+      children: [this.create_heading(), this.create_description(), this.create_caption(), this.create_table(), ...this.create_implementation_notes()],
     };
     return new_section
   }
 
-  create_table_of_contents() {
-    return new docx.TableOfContents("Summary", {
-      hyperlink: true,
-      headingStyleRange: "1-3",
-    })
-  }
 
   create_implementation_notes(): docx.Paragraph[] {
     if (this.node.extensions) {
