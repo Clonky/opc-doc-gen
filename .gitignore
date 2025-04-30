@@ -9,3 +9,4 @@ tests/resources/**/*
 *.xlsx
 *.xlsm
 *.docx
+/coverage/**/*
