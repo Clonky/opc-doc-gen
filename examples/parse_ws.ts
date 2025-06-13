@@ -1,10 +1,10 @@
 import { writeFileSync } from "fs";
-import { Converter } from "../src/converter";
+import { SiomeConverter } from "../src/converter";
 import { PageView } from "../src/views/page";
 import { Namespaces } from "../src/models/namespace";
 import { NamespacesView } from "../src/views/namespaces";
 
-const converter = new Converter("http://opcfoundation.org/UA/Weihenstephan/", "tests/resources/");
+const converter = new SiomeConverter("http://opcfoundation.org/UA/WeihenstephanStandards/WSBasis/", "tests/resources/");
 const nodes = converter.write()
 const namespaces = new Namespaces(converter.specs.target_spec!);
 const namespaces_view = new NamespacesView(namespaces)

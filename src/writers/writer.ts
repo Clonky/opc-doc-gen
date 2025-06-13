@@ -224,29 +224,18 @@ class NodeWriter {
       properties: {
         type: docx.SectionType.CONTINUOUS,
       },
-      children: [this.create_heading(), this.create_description(), this.create_caption(), this.create_table(), ...this.create_implementation_notes()],
+      children: [this.create_heading(), this.create_description(), this.create_caption(), this.create_table()],
     };
+    const implementation_notes = this.create_implementation_notes();
+    for (const note of implementation_notes) {
+      new_section.children.push(note);
+    }
     return new_section
   }
 
 
   create_implementation_notes(): docx.Paragraph[] {
-    if (this.node.extensions) {
-      const pars = Array.from(this.node.extensions.extension).map((iextension) => {
-        if (iextension.text) {
-          return new docx.Paragraph({
-            text: iextension.text,
-          });
-        } else {
-          return new docx.Paragraph({
-            text: "",
-          });
-        }
-      });
-      return pars
-    } else {
-      return [];
-    }
+    return this.node.implementation_notes.write();
   }
 
   create_heading() {

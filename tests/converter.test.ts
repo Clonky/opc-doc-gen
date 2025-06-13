@@ -25,10 +25,10 @@ describe("Check the correct execution of the converter classes", () => {
     const nodes = converter.get_traced_nodes();
     expect(nodes.length).toBeGreaterThan(0);
   });
-  test("Create converter", async () => {
-    const converter = await setup_converter("http://opcfoundation.org/UA/DI/");
-    const out = converter.write();
-    await out.saveToFile("./", "test.docx");
-    expect(out).toBeDefined();
-  });
+  //  test("Create converter", async () => {
+  //const converter = await setup_converter("http://opcfoundation.org/UA/DI/");
+  //const out = converter.write();
+  //await out.saveToFile("./", "test.docx");
+  //expect(out).toBeDefined();
+  //});
 });

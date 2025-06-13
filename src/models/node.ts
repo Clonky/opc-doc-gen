@@ -2,6 +2,7 @@ import {
   CompanionSpecifications,
   ICompanionSpecification,
 } from "./companion_specification";
+import { ImplementationNoteReader } from "./readers/implementation_note_rw";
 
 interface INode {
   browsename: string;
@@ -24,7 +25,7 @@ export class Node implements INode {
   dtype: string;
   modellingrule: string;
   description?: string | undefined;
-  extensions?: Extensions | null;
+  implementation_notes: ImplementationNoteReader;
 
   parse_nodeclass(tag: string): string {
     if (tag === "UAObjectType") {
@@ -90,10 +91,7 @@ export class Node implements INode {
       const isabstract = node_dom.getAttribute("IsAbstract");
       const refs = node_dom.querySelectorAll("Reference");
       const description_node = node_dom.querySelector("Description");
-      const extensions = node_dom.querySelector("Extensions");
-      if (extensions) {
-        this.extensions = new Extensions(extensions);
-      }
+      this.implementation_notes = new ImplementationNoteReader(node_dom);
       if (description_node) {
         this.description = description_node.textContent ?? "";
       } else {
@@ -189,11 +187,11 @@ class References {
 
 class Extension {
   tag: string;
-  text: string | null;
+  implementation_note_text: string | null;
 
   constructor(node: Element) {
     this.tag = node.tagName;
-    this.text = node.textContent;
+    this.implementation_note_text = node.querySelector("ImplementationNote")?.textContent ?? null;
   }
 }
 
@@ -202,11 +200,21 @@ class Extensions {
 
   constructor(node: Element) {
     // This is currently hardwired to expect the ws namespace. Might have to change in the future
-    this.extension = Array.from(node.querySelectorAll("ws\\:Extension")).map(
+    this.extension = Array.from(node.querySelectorAll("Extension")).map(
       (ielement) => new Extension(ielement)
     );
   }
+}
 
+class ImplementationNotes {
+  notes: string[];
+  constructor(node: Element) {
+    const notes = Array.from(node.querySelectorAll("ImplementationNote"));
+    this.notes = [];
+    for (const note of notes) {
+      this.notes.push(note.textContent ?? "");
+    }
+  }
 }
 
 interface ILinkedNode {
