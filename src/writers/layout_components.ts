@@ -246,7 +246,7 @@ export class RefRow {
                 left: convertMillimetersToTwip(1.9),
                 right: convertMillimetersToTwip(1.9),
             },
-            children: [this.paragraph("Subtype of " + this.browsename + " defined in TODO")]
+            children: [this.paragraph("Subtype of " + this.browsename)]
         })
     }
 
