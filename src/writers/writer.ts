@@ -240,7 +240,7 @@ class NodeWriter {
 
   create_heading() {
     return new docx.Paragraph({
-      text: this.node.browsename,
+      text: this.node.get_browsename(),
       heading: docx.HeadingLevel.HEADING_2,
     });
   }
@@ -264,7 +264,7 @@ class NodeWriter {
           bold: true,
         }),
         new docx.SimpleField("SEQ Table \\* ARABIC"),
-        new docx.TextRun(" " + this.node.browsename + "Definition"),
+        new docx.TextRun(" \u2014 " + this.node.get_browsename() + " Definition"),
       ],
       style: "tableTitle"
     })

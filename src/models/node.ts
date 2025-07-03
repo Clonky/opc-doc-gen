@@ -14,6 +14,8 @@ interface INode {
   modellingrule: string;
   description?: string;
   extensions?: Extensions | null;
+
+  get_browsename(): string;
 }
 
 export class Node implements INode {
@@ -57,6 +59,15 @@ export class Node implements INode {
       }
     } else {
       return default_dtype;
+    }
+  }
+
+  get_browsename(): string {
+    const split_browsename = this.browsename.split(":");
+    if (split_browsename.length < 2) {
+      return this.browsename;
+    } else {
+      return split_browsename[1].trim();
     }
   }
 

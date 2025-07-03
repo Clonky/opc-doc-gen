@@ -65,7 +65,7 @@ export class TableTop implements ITableComponent {
     //rows.push(top_row);
     const top_partition_row = layout.top_partition_row("Attribute", "Value");
     rows.push(top_partition_row);
-    const bn_top_row = layout.top_partition_row("BrowseName", this.node.browsename);
+    const bn_top_row = layout.top_partition_row("BrowseName", this.node.get_browsename());
     rows.push(bn_top_row);
     const abstract_top_row = layout.top_partition_row("IsAbstract", this.node.isabstract);
     rows.push(abstract_top_row);
