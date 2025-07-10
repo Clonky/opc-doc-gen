@@ -6,11 +6,12 @@ export class ImplementationNoteReader {
 
     constructor(node_dom: Element) {
         const extensions_el = node_dom.querySelector("Extensions");
+        this.notes = [];
         if (extensions_el) {
             const extension = Array.from(extensions_el.querySelectorAll('Extension'));
             this.extensions = extension;
-            this.notes = extension.map((ext) => {
-                return ext.textContent?.trim() ?? "";
+            extension.forEach((ext) => {
+                this.notes.push(ext.textContent?.trim() ?? "");
             });
         }
     }
@@ -20,9 +21,9 @@ export class ImplementationNoteReader {
     }
 
     write(): Paragraph[] {
-        const paragraphs: Paragraph[] = [];
-        if (this.extensions && this.extensions.length > 0) {
-            for (const note of this.notes) {
+        let paragraphs: Paragraph[] = [];
+        for (const note of this.notes) {
+            if (note.trim() !== "") {
                 paragraphs.push(new Paragraph({
                     text: note,
                 }));
