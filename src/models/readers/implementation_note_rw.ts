@@ -7,11 +7,10 @@ export class ImplementationNoteReader {
     constructor(node_dom: Element) {
         const extensions_el = node_dom.querySelector("Extensions");
         if (extensions_el) {
-            const notes = extensions_el.querySelectorAll("ImplementationNote");
-            this.extensions = Array.from(notes);
-            this.notes = Array.from(notes).map((ext) => {
-                const note = ext.textContent?.trim();
-                return note ? note : "";
+            const extension = Array.from(extensions_el.querySelectorAll('Extension'));
+            this.extensions = extension;
+            this.notes = extension.map((ext) => {
+                return ext.textContent?.trim() ?? "";
             });
         }
     }

@@ -32,7 +32,7 @@ describe("Test extraction of extension tags and writing them to the according se
         const target_node = nodes.filter((inode) => inode.browsename === "8:WSFormType").at(0);
         expect(target_node).toBeDefined();
         if (target_node) {
-            expect(target_node.extensions?.extension.length).toEqual(4)
+            expect(target_node.implementation_notes.notes.length).toEqual(4)
         }
     });
     //    test("Check for included extensions in the docx file", async () => {
