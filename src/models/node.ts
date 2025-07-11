@@ -3,6 +3,7 @@ import {
   ICompanionSpecification,
 } from "./companion_specification";
 import { ImplementationNoteReader } from "./readers/implementation_note_rw";
+import { Element } from "@xmldom/xmldom";
 
 interface INode {
   browsename: string;
@@ -72,7 +73,7 @@ export class Node implements INode {
   }
 
   public static parse_modelling_rule(node_dom: Element): string {
-    const refs = Array.from(node_dom.querySelectorAll("Reference"));
+    const refs = Array.from(node_dom.getElementsByTagName("Reference"));
     const modelling_rule = refs.filter(
       (iref) => iref.getAttribute("ReferenceType") === "HasModellingRule"
     );
@@ -100,8 +101,8 @@ export class Node implements INode {
       const browsename = node_dom.getAttribute("BrowseName")!;
       const nodeid = new NodeId(node_dom.getAttribute("NodeId")!);
       const isabstract = node_dom.getAttribute("IsAbstract");
-      const refs = node_dom.querySelectorAll("Reference");
-      const description_node = node_dom.querySelector("Description");
+      const refs = node_dom.getElementsByTagName("Reference");
+      const description_node = node_dom.getElementsByTagName("Description")[0];
       this.implementation_notes = new ImplementationNoteReader(node_dom);
       if (description_node) {
         this.description = description_node.textContent ?? "";
@@ -202,7 +203,7 @@ class Extension {
 
   constructor(node: Element) {
     this.tag = node.tagName;
-    this.implementation_note_text = node.querySelector("ImplementationNote")?.textContent ?? null;
+    this.implementation_note_text = node.getElementsByTagName("ImplementationNote")[0]?.textContent ?? null;
   }
 }
 
@@ -211,7 +212,7 @@ class Extensions {
 
   constructor(node: Element) {
     // This is currently hardwired to expect the ws namespace. Might have to change in the future
-    this.extension = Array.from(node.querySelectorAll("Extension")).map(
+    this.extension = Array.from(node.getElementsByTagName("Extension")).map(
       (ielement) => new Extension(ielement)
     );
   }
@@ -220,7 +221,7 @@ class Extensions {
 class ImplementationNotes {
   notes: string[];
   constructor(node: Element) {
-    const notes = Array.from(node.querySelectorAll("ImplementationNote"));
+    const notes = Array.from(node.getElementsByTagName("ImplementationNote"));
     this.notes = [];
     for (const note of notes) {
       this.notes.push(note.textContent ?? "");

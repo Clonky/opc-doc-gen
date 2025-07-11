@@ -5,6 +5,7 @@ import {
 import { LinkedNode, Node, RefAndTrace } from "./models/node";
 import * as handlebars from "handlebars";
 import { DocWriter } from "./writers/writer";
+import { Document } from "@xmldom/xmldom";
 
 interface IConverter {
   target: string;

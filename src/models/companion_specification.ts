@@ -1,4 +1,6 @@
 import { INodeId, Node } from "./node";
+import { XMLParser } from "fast-xml-parser";
+import { Document } from "@xmldom/xmldom";
 
 interface ICompanionSpecifications {
   target: string;
@@ -37,10 +39,11 @@ export class CompanionSpecification implements ICompanionSpecification {
   }
 
   public static from_string(raw_nodeset: string): CompanionSpecification {
-    const parser = new DOMParser();
-    const parsed_string = parser.parseFromString(
+    const parser = new XMLParser({
+      ignoreAttributes: false,
+    });
+    const parsed_string = parser.parse(
       raw_nodeset,
-      "application/xml"
     );
     return new CompanionSpecification(parsed_string);
   }
@@ -53,9 +56,9 @@ export class CompanionSpecification implements ICompanionSpecification {
     if (!this.nodes) {
       this.nodes = new Map<string, Node>();
       const types = this.get_nodes_of_types();
-      const objs = Array.from(this.nodeset.querySelectorAll("UAObject"));
-      const vars = Array.from(this.nodeset.querySelectorAll("UAVariable"));
-      const methods = Array.from(this.nodeset.querySelectorAll("UAMethod"));
+      const objs = Array.from(this.nodeset.getElementsByTagName("UAObject"));
+      const vars = Array.from(this.nodeset.getElementsByTagName("UAVariable"));
+      const methods = Array.from(this.nodeset.getElementsByTagName("UAMethod"));
       const rest = objs.concat(vars, methods).map((inode) => new Node(inode));
       const all_nodes = types.concat(rest);
       for (const node of all_nodes) {
@@ -68,11 +71,11 @@ export class CompanionSpecification implements ICompanionSpecification {
   }
 
   public get_nodes_of_types(): Node[] {
-    const obj_types = Array.from(this.nodeset.querySelectorAll("UAObjectType"));
+    const obj_types = Array.from(this.nodeset.getElementsByTagName("UAObjectType"));
     const variable_types = Array.from(
-      this.nodeset.querySelectorAll("UAVariableType")
+      this.nodeset.getElementsByTagName("UAVariableType")
     );
-    const data_types = Array.from(this.nodeset.querySelectorAll("UADataType"));
+    const data_types = Array.from(this.nodeset.getElementsByTagName("UADataType"));
     return obj_types
       .concat(variable_types, data_types)
       .map((inode) => new Node(inode));
@@ -106,7 +109,7 @@ export class CompanionSpecification implements ICompanionSpecification {
   }
 
   public get_namespaces(): string[] {
-    const uri_elements = this.nodeset.querySelectorAll("Uri");
+    const uri_elements = this.nodeset.getElementsByTagName("Uri");
     if (uri_elements.length > 0) {
       const uris = Array.from(uri_elements).map((iel) => iel.textContent!);
       return ["http://opcfoundation.org/UA/"].concat(uris); // Add the implicit core spec explicitly

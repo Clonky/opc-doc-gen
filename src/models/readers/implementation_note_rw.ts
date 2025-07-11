@@ -1,14 +1,15 @@
 import { Paragraph } from "docx";
+import { Element } from "@xmldom/xmldom";
 
 export class ImplementationNoteReader {
     notes: string[];
     extensions?: Element[];
 
     constructor(node_dom: Element) {
-        const extensions_el = node_dom.querySelector("Extensions");
+        const extensions_el = node_dom.getElementsByTagName("Extensions")[0];
         this.notes = [];
         if (extensions_el) {
-            const extension = Array.from(extensions_el.querySelectorAll('Extension'));
+            const extension = Array.from(extensions_el.getElementsByTagName('Extension'));
             this.extensions = extension;
             extension.forEach((ext) => {
                 this.notes.push(ext.textContent?.trim() ?? "");
