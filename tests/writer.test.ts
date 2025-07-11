@@ -79,7 +79,8 @@ describe('DocWriter', () => {
             get_namespaces: jest.fn().mockReturnValue(['Namespace1', 'Namespace2']),
             get_model_uri: jest.fn().mockReturnValue('http://test.org/UA/Mock/'),
             get_uri_by_ns_id: jest.fn().mockReturnValue('http://test.org/UA/Mock/'),
-            lookup: jest.fn()
+            lookup: jest.fn(),
+            get_browsename: jest.fn().mockReturnValue('MockNode')
         } as unknown as CompanionSpecification;
 
         const writer = new DocWriter(mockNodes, mockSpec);
@@ -151,6 +152,6 @@ function createMockNode(name: string): Node {
                 nodeid: { prefix: 0, suffix: '58' },
                 issubtype: false
             })
-        }
+        },
     } as unknown as Node;
 }

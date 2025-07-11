@@ -6,7 +6,7 @@ import { SiomeConverter } from "../src/converter";
 import * as fs from "fs";
 
 const setup_converter = async (target: string) => {
-  const folder = "./tests/resources/reduced_set/";
+  const folder = "./tests/resources/";
   const files = fs.readdirSync(folder);
   const specs: Document[] = [];
   for (const ifile of files) {

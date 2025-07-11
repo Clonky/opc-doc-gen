@@ -11,10 +11,11 @@ interface ICompanionSpecifications {
 export interface ICompanionSpecification {
   nodeset: Document;
   uri: string;
+  nodes?: Map<string, Node>;
 
   get_model_uri(): string;
   get_own_ns_id(): number;
-  get_nodes(): Node[];
+  get_nodes(): Map<string, Node>;
   get_nodes_of_types(): Node[];
   lookup(nodeid: INodeId): Node;
   get_uri_by_ns_id(nodeid: INodeId): string;
@@ -25,6 +26,7 @@ export interface ICompanionSpecification {
 export class CompanionSpecification implements ICompanionSpecification {
   nodeset: Document;
   uri: string;
+  nodes?: Map<string, Node>;
 
   constructor(nodeset: Document) {
     this.nodeset = nodeset;
@@ -47,14 +49,22 @@ export class CompanionSpecification implements ICompanionSpecification {
     return CompanionSpecification.from_string(content);
   }
 
-  public get_nodes(): Node[] {
-    const types = this.get_nodes_of_types();
-    const objs = Array.from(this.nodeset.querySelectorAll("UAObject"));
-    const vars = Array.from(this.nodeset.querySelectorAll("UAVariable"));
-    const methods = Array.from(this.nodeset.querySelectorAll("UAMethod"));
-    const rest = objs.concat(vars, methods).map((inode) => new Node(inode));
-    const all_nodes = types.concat(rest);
-    return all_nodes;
+  public get_nodes(): Map<string, Node> {
+    if (!this.nodes) {
+      this.nodes = new Map<string, Node>();
+      const types = this.get_nodes_of_types();
+      const objs = Array.from(this.nodeset.querySelectorAll("UAObject"));
+      const vars = Array.from(this.nodeset.querySelectorAll("UAVariable"));
+      const methods = Array.from(this.nodeset.querySelectorAll("UAMethod"));
+      const rest = objs.concat(vars, methods).map((inode) => new Node(inode));
+      const all_nodes = types.concat(rest);
+      for (const node of all_nodes) {
+        this.nodes.set(node.nodeid.suffix, node);
+      }
+      return this.nodes;
+    } else {
+      return this.nodes;
+    }
   }
 
   public get_nodes_of_types(): Node[] {
@@ -84,7 +94,7 @@ export class CompanionSpecification implements ICompanionSpecification {
 
   public lookup(nodeid: INodeId): Node {
     const nodes = this.get_nodes();
-    const node = nodes.find((inode) => inode.nodeid.suffix === nodeid.suffix);
+    const node = nodes.get(nodeid.suffix);
     if (node) {
       return node;
     } else {

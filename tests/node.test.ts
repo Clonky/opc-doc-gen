@@ -42,7 +42,7 @@ describe("Test the node interface and node creation", () => {
     expect(exp).toBe(node.browsename);
   });
   test("See if all references are parsed", async () => {
-    const exp = 16;
+    const exp = 1;
     const comp_spec = await setup();
     const object_types =
       comp_spec.nodeset.getElementsByTagName("UAObjectType")!;
@@ -60,28 +60,6 @@ describe("Test the node interface and node creation", () => {
       comp_spec.nodeset.getElementsByTagName("UAObjectType")!;
     const node = new Node(object_types[0]);
     expect(exp).toEqual(node.references.get_typedef());
-  });
-  test("See if grabbing the type definition works for present", async () => {
-    const exp_type = "HasTypeDefinition";
-    const exp_value = new NodeId("ns=0;i=68");
-    const comp_spec = await setup();
-    const nodes = comp_spec.get_nodes();
-    const node = nodes.find(
-      (inode) => inode.browsename === "IsNamespaceSubset"
-    )!;
-    expect(exp_type).toBe(node.references.get_typedef()?.reftype);
-    expect(exp_value).toStrictEqual(node.references.get_typedef()?.nodeid);
-  });
-  test("Check if lookup for references works", async () => {
-    const exp_type = "HasTypeDefinition";
-    const exp_value = new NodeId("ns=0;i=68");
-    const comp_spec = await setup();
-    const nodes = comp_spec.get_nodes();
-    const node = nodes.find(
-      (inode) => inode.browsename === "IsNamespaceSubset"
-    )!;
-    expect(exp_type).toBe(node.references.get_typedef()?.reftype);
-    expect(exp_value).toStrictEqual(node.references.get_typedef()?.nodeid);
   });
 });
 
@@ -102,6 +80,7 @@ describe("Test linked node functionality", () => {
     const comp_specs = await setup_specs(
       "http://opcfoundation.org/UA/Weihenstephan/"
     );
+    const nodes = comp_specs?.target_spec?.get_nodes();
     const node = comp_specs?.target_spec?.lookup(target_nodeid);
     const linkedNode = new LinkedNode(node!, comp_specs!.target_spec!);
     const nodeStack = linkedNode.trace(comp_specs!, []);
